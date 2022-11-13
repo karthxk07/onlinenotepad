@@ -2,6 +2,8 @@
 <head>
 	<title>Online Notepad</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	
 </head>
 
 <body>
@@ -9,37 +11,74 @@
 		<center><h1>Online Notepad</h1></center>
 	</div>
 	<div id='main'>
-		<textarea placeholder='Enter your note here!' id='t'></textarea><br><br>
-		<center><input value='Save and Download' type='button' onclick="saveTextAsFile(t.value,'download.txt')" id ="down"/></center>
-		<script type='text/javascript'>
-		 function saveTextAsFile(textToWrite, fileNameToSaveAs)
-    {
-    	var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'}); 
-    	var downloadLink = document.createElement("a");
-    	downloadLink.download = fileNameToSaveAs;
-    	downloadLink.innerHTML = "Download File";
-    	if (window.webkitURL != null)
-    	{
-    		// Chrome allows the link to be clicked
-    		// without actually adding it to the DOM.
-    		downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-    	}
-    	else
-    	{
-    		// Firefox requires the link to be added to the DOM
-    		// before it can be clicked.
-    		downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-    		downloadLink.onclick = destroyClickedElement;
-    		downloadLink.style.display = "none";
-    		document.body.appendChild(downloadLink);
-    	}
-    
-    	downloadLink.click();
-    }
-		</script>
-
+		<textarea placeholder='Enter your note here!' id='t' ></textarea><br><br>
+		<center><p style = "font-size: 25px;">Share your note using the link <p id='url'></p></p></center>
+	</div>
+	<script type="module" id="imports">
+		document.getElementById('url').innerHTML = window.location.href;
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+		import {getDatabase,ref,set,onValue,child,get} from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+		const Params = new URLSearchParams(window.location.search);
+		var id  = Params.get('id');
 		
+		// TODO: Add SDKs for Firebase products that you want to use
+		// https://firebase.google.com/docs/web/setup#available-libraries
+			
+		// Your web app's Firebase configuration
+		const firebaseConfig = {
+			apiKey: "AIzaSyBcwoOf8skOfhI-FwxXR9cnJoiY0ovMpZs",
+			authDomain: "onlinenotepad1.firebaseapp.com",
+			projectId: "onlinenotepad1",
+			storageBucket: "onlinenotepad1.appspot.com",
+			messagingSenderId: "310187430928",
+			appId: "1:310187430928:web:f2e7406713ce62cdfd6695",
+			databaseURL:"https://onlinenotepad1-default-rtdb.firebaseio.com/"
+		};
+		const app = initializeApp(firebaseConfig);	
+		// Initialize Firebase
+		
+		const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		const db = getDatabase();
+		console.log(id);
+		onValue(ref(db,'users/'+id+'/note'), (snapshot) => {
+  			const data = snapshot.val();
+  			document.getElementById('t').value = data;
+		});
+		function generateString(length) {
+			let result = ' ';
+			const charactersLength = characters.length;
+			for ( let i = 0; i < length; i++ ) {
+				result += characters.charAt(Math.floor(Math.random() * charactersLength));
+			}
 
-	</div>	
+			return result;
+		}
+		if (id==null){
+			
+			
+				var id_random = generateString(5);
+				console.log(id_random);
+				
+				console.log(document.location.search);
+				get(child(ref(db), `users/${id_random}`)).then((snapshot) => {
+					if (snapshot.exists()==true) {
+						console.log(snapshot.exists())
+						document.location.href = document.location.pathname;
+					} else {    
+						console.log("No data available");
+						document.location.href = document.location.pathname + "?id="+id_random;
+						
+					}
+				}).catch((error) => {
+					console.error(error);
+				});
+		
+		}
+		document.getElementById('t').addEventListener('keyup',function(){
+			set(ref(db,'users/'+id),{
+				note:document.getElementById('t').value,
+			})
+		})
+	</script>	
 </body>
 </html>
