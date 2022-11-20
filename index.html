@@ -128,7 +128,7 @@
 		//Setting up Firebase
 		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
 		import {getDatabase,ref,set,onValue,child,get} from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
-		import { getAuth, signInWithPopup,signInWithRedirect, GoogleAuthProvider, signOut} from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js";
+		import { getAuth, signInWithPopup,signInWithRedirect, GoogleAuthProvider, signOut,getRedirectResult,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js";
 
 
 
@@ -146,14 +146,39 @@
 		};
 		const app = initializeApp(firebaseConfig);	
 		const db = getDatabase();
+		const auth = getAuth(app);
+		const provider = new GoogleAuthProvider(app);
+		var user;
 		
+		//check login
+		onAuthStateChanged(auth, (user) => {
+		if (user) {
+			// User is signed in, see docs for a list of available properties
+			// https://firebase.google.com/docs/reference/js/firebase.User
+			document.getElementById("login").style.display="none";
+			document.getElementById("pfp").style.display="block";
+			document.getElementById("pfp-name").innerHTML=user.displayName;
+			document.getElementById("pfp-img").src=user.photoURL;
+			set(ref(db,'ids/'+id),{
+				email:user.email,
+				note:document.getElementById('t').value,
+			});
+			
+			// ...
+		} else {
+			// User is signed out
+			// ...
+		}
+		});
+
+
+
+
 
 
 
 		//login
-		const auth = getAuth(app);
-		const provider = new GoogleAuthProvider(app);
-		var user;
+		
 		document.getElementById('login').addEventListener('click',(e)=> {signInWithPopup(auth, provider)
 		.then((result) => {
 			// This gives you a Google Access Token. You can use it to access the Google API.
@@ -164,12 +189,13 @@
 			console.log(user);
 			document.getElementById("login").style.display="none";
 			document.getElementById("pfp").style.display="block";
-			
 			document.getElementById("pfp-name").innerHTML=user.displayName;
 			document.getElementById("pfp-img").src=user.photoURL;
-			set(ref(db,'emailid/'+id),{
+			set(ref(db,'ids/'+id),{
 				email:user.email,
+				note:document.getElementById('t').value,
 			});
+			
 
 			// ...
 		}).catch((error) => {
@@ -204,7 +230,7 @@
 
 
 		//Setting the value of text area
-		onValue(ref(db,'notes/'+id+'/note'), (snapshot) => {
+		onValue(ref(db,'ids/'+id+'/note'), (snapshot) => {
   			const data = snapshot.val();
   			document.getElementById('t').value = data;
 		},{
@@ -217,7 +243,7 @@
 		if (id==null){
 			var id_random = generateString(5);
 			console.log(document.location.search);
-			get(child(ref(db), `users/${id_random}`)).then((snapshot) => {
+			get(child(ref(db), `ids/${id_random}`)).then((snapshot) => {
 				if (snapshot.exists()==true) {
 					document.location.href = document.location.pathname;
 				} else {    
@@ -231,9 +257,18 @@
 
 		//Updating the text area value in the database
 		document.getElementById('t').addEventListener('keyup',function(){
-			set(ref(db,'notes/'+id),{
+			if(typeof user === undefined){
+			set(ref(db,'ids/'+id),{
 				note:document.getElementById('t').value,
+				
+			})}
+			else{
+				set(ref(db,'ids/'+id),{
+				note:document.getElementById('t').value,
+				email:user.email,
+				
 			})
+			}
 		})
 
 
