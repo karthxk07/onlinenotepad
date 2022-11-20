@@ -257,15 +257,15 @@
 
 		//Updating the text area value in the database
 		document.getElementById('t').addEventListener('keyup',function(){
-			if(typeof user === undefined){
-			set(ref(db,'ids/'+id),{
-				note:document.getElementById('t').value,
-				
-			})}
+			console.log(typeof user)
+			if(typeof user === 'undefined'){
+				set(ref(db,'ids/'+id),{
+					note:document.getElementById('t').value,
+				})}
 			else{
 				set(ref(db,'ids/'+id),{
-				note:document.getElementById('t').value,
-				email:user.email,
+					note:document.getElementById('t').value,
+					email:user.email,
 				
 			})
 			}
