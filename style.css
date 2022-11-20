@@ -8,10 +8,50 @@ textarea::placeholder {
 .nav-item{
 	cursor: pointer;
 }
-#toCopy:after{
-	color:rgb(92, 219, 219);
-}
+
 #url{
 	cursor: pointer;
 	padding-top: 8px;
+}
+#url:hover{
+	color:#8ab4f8
+}
+.toolbar{
+	text-align: right;
+}
+.toolbar-menu{
+	background-color: rgb(216, 213, 213);
+	max-width: max-content;
+	display: inline;
+	
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius:10px ;
+	padding: 5px 5px 10px 5px;
+}
+.toolbar a{
+	
+	border-radius: 6px;
+	padding: 1px 3px 7px 3px;
+	text-align: center;
+}
+.toolbar a:hover{
+	background-color: gray;
+}
+.toolbar-item{
+	display:inline;
+	
+}
+.toolbar-img{
+	max-width:25px;
+}
+.toolbar-tool{
+	display: none;
+	position: absolute;
+	
+}
+#color:hover .toolbar-tool{
+	display: block;
+	text-align: center;
+	background-color: blue;
+	z-index: 0;
 }
